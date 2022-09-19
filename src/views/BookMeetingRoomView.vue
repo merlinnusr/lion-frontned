@@ -1,7 +1,10 @@
 <template>
     <div class="main">
+        <h1>Crear nueva sala de juntas</h1>
+                <hr>
         <div class="card">
-            <div class="card body">
+            <div class="card-body mx-auto">
+
                 <form>
                     <div class="form-group">
                         <label for="meeting_date_start">Horario de comienzo de uso de sala de juntas:</label>
