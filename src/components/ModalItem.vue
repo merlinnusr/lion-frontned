@@ -1,0 +1,49 @@
+<template>
+    <div v-if="open">
+      <transition name="modal">
+        <div class="modal-mask">
+          <div class="modal-wrapper">
+            <div class="modal-dialog" role="document">
+              <slot></slot>
+            </div>
+          </div>
+        </div>
+      </transition>
+    </div>
+  </template>
+  
+  <script>
+  export default {
+    name: "ModalItem",
+    props: {
+      open: {
+        required: true
+      }
+    },
+    methods: {
+      close() {
+        this.$emit("input", !this.value);
+      }
+    }
+  };
+  </script>
+  
+  
+  <style lang="css" scoped>
+  .modal-mask {
+      position: fixed;
+      z-index: 9998;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, .5);
+      display: table;
+      transition: opacity .3s ease;
+  }
+  
+  .modal-wrapper {
+      display: table-cell;
+      vertical-align: middle;
+  }
+  </style>
