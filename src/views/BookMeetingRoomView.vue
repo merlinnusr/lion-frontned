@@ -108,6 +108,7 @@ export default {
             }).then((response) => {
                 console.log(response.msg);
                 this.successMsg = response.data.msg;
+                this.$router.push('/book-meeting-room-list')
             }).catch((error) => {
                 this.errors = [];
                 if (error.response.status === 422) {

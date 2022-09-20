@@ -78,7 +78,7 @@
                             <label for="meeting_room_id">Salas</label>
                             <select v-model="meeting_room_id" class="form-control" name="meeting_room_id"
                                 id="meeting_room_id">
-                                <option v-for="meeting_room in meeting_rooms" :key="meeting_room.id"
+                                <option v-for="meeting_room in meeting_rooms_list" :key="meeting_room.id"
                                     :value="meeting_room.id">
                                     {{meeting_room.name}}
                                 </option>
@@ -90,14 +90,13 @@
                         <li v-for="error in errors" :key="error">
                             {{error}}
                         </li>
-                        <button class="btn btn-primary">Reservar</button>
                     </form>
 
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary"
                         @click="show_edit_meeting_room_modal = !show_edit_meeting_room_modal">Cerrar</button>
-                    <button type="button" class="btn btn-primary" @click="deleteBookedMeetingRoom">Editar</button>
+                    <button type="button" class="btn btn-primary" @click="updateBookedMeetingRoom">Editar</button>
                 </div>
             </div>
         </ModalItem>
@@ -106,7 +105,9 @@
   
 <script>
 import BookMeetingRoomService from '@/services/BookMeetingRoomService';
+import MeetingRoomService from '@/services/MeetingRoomService';
 import ModalItem from '../components/ModalItem.vue';
+import moment from 'moment';
 
 export default {
 
@@ -121,13 +122,39 @@ export default {
             meeting_date_start: '',
             meeting_date_end: '',
             error: [],
-            successMsg: ''
+            successMsg: '',
+            meeting_rooms_list: [],
         };
     },
     components: {
         ModalItem
     },
     methods: {
+        updateBookedMeetingRoom(){
+            BookMeetingRoomService.update(this.edit_meeting_room_id,{
+                'meeting_room_id':this.edit_meeting_room_id, 
+                'meeting_date_start': this.meeting_date_start,
+                'meeting_date_end': this.meeting_date_end
+            }).then((response)=>{
+                if(response.data.data.id){
+                    const objIndex = this.meeting_rooms.findIndex((obj => obj.id == this.edit_meeting_room_id));
+                    this.meeting_rooms[objIndex].meeting_date_start = response.data.data.meeting_date_start;
+                    this.meeting_rooms[objIndex].meeting_date_end = response.data.data.meeting_date_end;
+                    this.show_edit_meeting_room_modal = false;
+                }
+            })
+        },
+        editModal(id){
+            this.edit_meeting_room_id = id; 
+            this.show_edit_meeting_room_modal = true;
+            MeetingRoomService.getAll().then((response) => {
+                this.meeting_rooms_list = response.data.data.meeting_rooms;
+                const meeting_date_start = moment().endOf("day").format('YYYY-MM-DDThh:mm');
+                document.getElementById('meeting_date_start').setAttribute('min', meeting_date_start);
+                document.getElementById('meeting_date_end').setAttribute('min', meeting_date_start);
+
+            });
+        },
         deleteBookedMeetingRoom() {
             BookMeetingRoomService.delete(this.delete_meeting_room_id).then((response) => {
                 if (response.data.data === true) {

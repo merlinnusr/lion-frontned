@@ -10,6 +10,9 @@ class BookMeetingRoomService {
   delete(id){
     return http.delete(`/meeting_room/book/${id}`);
   }
+  update(id, data){
+    return http.put(`/meeting_room/book/${id}`, data);
+  }
 }
 
 export default new BookMeetingRoomService();
