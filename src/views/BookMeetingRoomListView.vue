@@ -74,16 +74,6 @@
                             <input class="form-control" type="datetime-local" id="meeting_date_end"
                                 name="meeting_date_end" @change="onChangeEndDate($event)" v-model="meeting_date_end" />
                         </div>
-                        <div class="form-group">
-                            <label for="meeting_room_id">Salas</label>
-                            <select v-model="meeting_room_id" class="form-control" name="meeting_room_id"
-                                id="meeting_room_id">
-                                <option v-for="meeting_room in meeting_rooms_list" :key="meeting_room.id"
-                                    :value="meeting_room.id">
-                                    {{meeting_room.name}}
-                                </option>
-                            </select>
-                        </div>
                         <li v-if="successMsg" class="alert alert-success">
                             {{successMsg}}
                         </li>
@@ -121,15 +111,25 @@ export default {
             show_edit_meeting_room_modal: false,
             meeting_date_start: '',
             meeting_date_end: '',
-            error: [],
+            errors: [],
             successMsg: '',
             meeting_rooms_list: [],
+            meeting_room_id: 0
         };
     },
     components: {
         ModalItem
     },
     methods: {
+        onChangeEndDate(){
+            console.log(this.meeting_date_end);
+            if (this.meeting_date_end <= this.meeting_date_start){
+                this.errors.push(
+                    'La fecha de finalizacion no puede ser mayor a la fecha de inicio'
+                );
+                this.meeting_date_end = "";
+            }
+        },
         updateBookedMeetingRoom(){
             BookMeetingRoomService.update(this.edit_meeting_room_id,{
                 'meeting_room_id':this.edit_meeting_room_id, 
@@ -141,6 +141,23 @@ export default {
                     this.meeting_rooms[objIndex].meeting_date_start = response.data.data.meeting_date_start;
                     this.meeting_rooms[objIndex].meeting_date_end = response.data.data.meeting_date_end;
                     this.show_edit_meeting_room_modal = false;
+                    this.meeting_date_start = '';
+                    this.meeting_date_end = '';
+                }
+            }).catch((error)=>{
+                this.errors = [];
+                if (error.response.status === 422) {
+                    let errors = error.response.data.errors;
+                    for (const [key, value] of Object.entries(errors)) {
+                        this.errors.push(`${key}: ${value}`);
+                    }
+                }
+                if (error.response.status === 500) {
+                    let errors = error.response.data.msg;
+                    console.log(error.response.data.msg);
+                    this.errors.push(
+                        errors
+                    );
                 }
             })
         },
